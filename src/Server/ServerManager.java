@@ -10,6 +10,10 @@ import java.util.Map;
 
 import static Server.PROTOCOL_MESSAGES.*;
 
+
+/**
+ * Classe que gere as conexões e controla o fluxo do jogo.
+ */
 public class ServerManager {
 
     private final Users mUsers;
@@ -176,6 +180,10 @@ public class ServerManager {
         }
     }
 
+    /**
+     * Envia a representação do meu de jogo para o cliente e processa a sua escolha.
+     * @throws IOException
+     */
     private void showMenu() throws IOException {
         dataOutputStream.writeUTF(SELECT_OPTION);
         dataOutputStream.writeUTF(PLAY_AGAIN);
@@ -201,6 +209,10 @@ public class ServerManager {
         }
     }
 
+    /**
+     * Envia para o cliente as estatisticas relativas aos seus jogos.
+     * @throws IOException
+     */
     public void getStats() throws IOException {
         Map<Integer, DifficultyType> stats = mGameStatistics.getUserStats(mCurrentUser);
 
@@ -403,8 +415,11 @@ public class ServerManager {
     }
 
 
+    /**
+     * Fecha as streams de dados e quebra a ligação com o cliente.
+     * @throws IOException
+     */
     public void cleanup() throws IOException {
-        // Cleanup operations, close the streams, the connection, but don't close the ServerSocket
         dataOutputStream.close();
         dataInputStream.close();
         mSocket.close();

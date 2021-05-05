@@ -8,6 +8,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
+import static Client.PROTOCOL_MESSAGES.INVALID_CREDENTIALS;
+import static Client.PROTOCOL_MESSAGES.END;
+import static Client.PROTOCOL_MESSAGES.CONNECTION_ACCEPTED;
+
 /**
  * A simple greeting client. More information about sockets at:
  * http://download.oracle.com/javase/tutorial/networking/sockets/index.html
@@ -18,8 +22,7 @@ public class Client
     // 'throws IOException' enables us to write the code without try/catch blocks
     // but it also keeps us from handling possible IO errors
     // (when for instance there is a problem when connecting with the other party)
-    public static void main(String args[]) throws IOException
-    {
+    public static void main(String args[]) throws IOException {
         initProcess();
     }
 
@@ -39,13 +42,12 @@ public class Client
             }
         }
 
-        // Open your connection to a server, at port 1234
+        // Inicia a conexão com o servidor, através do port especificado
         Socket socket = new Socket("localhost", 1234);
 
-        // Build DataStreams (input and output) to send and receive messages to/from the server
+        // Instânciação dos objectos utilizados para receber e enviar informação para o servidor.
         InputStream in = socket.getInputStream();
         DataInputStream dataIn = new DataInputStream(in);
-
         OutputStream out = socket.getOutputStream();
         DataOutputStream dataOut = new DataOutputStream(out);
 
@@ -58,10 +60,8 @@ public class Client
     }
 
     private static void validateAuthenticationRequest(DataOutputStream dataOutputStream, DataInputStream dataInputStream) throws IOException {
-
-        if (authenticate(dataOutputStream, dataInputStream)) {
+        if (authenticate(dataOutputStream, dataInputStream))
             initGame(dataOutputStream, dataInputStream);
-        }
     }
 
     static boolean authenticate(DataOutputStream dataOutputStream, DataInputStream dataInputStream) throws IOException {
@@ -84,7 +84,7 @@ public class Client
         String authenticationResponse = dataInputStream.readUTF();
         System.out.println(authenticationResponse);
 
-        if (authenticationResponse.contains("Invalid credentials")) {
+        if (authenticationResponse.contains(INVALID_CREDENTIALS)) {
             String response = scanner.nextLine();
 
             if (response.equals("Y")) {
@@ -93,7 +93,7 @@ public class Client
             } else
                 dataOutputStream.writeUTF(response);
         } else {
-            return authenticationResponse.equals("Welcome " + userName + ", the server accepted you!");
+            return authenticationResponse.equals(String.format(CONNECTION_ACCEPTED, userName));
         }
 
         return false;
@@ -106,7 +106,7 @@ public class Client
             while (true) {
                 while (true) {
                     String message = dataInputStream.readUTF();
-                    if (message.equals("END"))
+                    if (message.equals(END))
                         break;
                     System.out.println(message);
                 }
