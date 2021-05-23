@@ -1,19 +1,18 @@
 package Server;
 
+import java.io.*;
 import java.util.HashMap;
-import java.util.Map;
 
-public class Users {
-    Map<String, String> mUsers = new HashMap<>(); // Utilizadores que estão "registados" no servidor e podem aceder às suas funcionalidades
+public class Users implements Serializable {
+
+    HashMap<String, User> mUsers = new HashMap<>(); // Utilizadores que estão "registados" no servidor e podem aceder às suas funcionalidades
+    public User mCurrentUser;
 
 
     Users() {
-        mUsers.put("admin", "admin");
-        mUsers.put("user", "user");
     }
 
     /**
-     *
      * @return true se o utilizador estiver "registado" no servidor, false caso contrário
      */
     public boolean userExists(String user) {
@@ -22,11 +21,46 @@ public class Users {
 
     /**
      * Processa a validação das credênciais do utilizador.
-     * @param user Utilizador cuja password vai ser validada
+     *
+     * @param user     Utilizador cuja password vai ser validada
      * @param password Password a ser validada
      * @return true se as credênciais forem válidas, false caso contrário
      */
     public boolean isPasswordValid(String user, String password) {
-        return userExists(user) && mUsers.get(user).equals(password);
+        return userExists(user) && mUsers.get(user).getPassword().equals(password);
+    }
+
+    /**
+     * Altera o utilizador que está autênticado.
+     * @param user Utilizador que está autênticado num dado momento.
+     */
+    public void setCurrentUser(User user) {
+        mCurrentUser = user;
+    }
+
+    public void save() throws IOException {
+        FileOutputStream fout = new FileOutputStream("users.data");
+        ObjectOutputStream oos = new ObjectOutputStream(fout);
+        oos.writeObject(mUsers);
+
+        oos.close();
+    }
+
+    public void load() throws IOException, ClassNotFoundException {
+        File userFile = new File("users.data");
+
+        if (userFile.createNewFile())
+            System.out.println("Creating new data store file.");
+        
+        FileInputStream fileInputStream = new FileInputStream(userFile);
+
+        if (fileInputStream.available() == 0)
+            return;
+
+        ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+
+        mUsers = (HashMap<String, User>) objectInputStream.readObject();
+
+        objectInputStream.close();
     }
 }
